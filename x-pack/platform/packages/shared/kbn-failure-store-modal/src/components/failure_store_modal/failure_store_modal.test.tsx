@@ -18,6 +18,7 @@ const defaultProps = {
     failureStoreEnabled: false,
     defaultRetentionPeriod: '30d',
   } as FailureStoreFormProps,
+  isSaveButtonLoading: false,
 };
 
 const renderModal = (failureStoreProps = defaultProps.failureStoreProps) => {
