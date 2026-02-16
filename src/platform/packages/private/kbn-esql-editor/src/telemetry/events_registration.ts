@@ -216,15 +216,23 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
     schema: {
       browser_kind: {
         type: 'keyword',
-        _meta: { description: 'Which resource browser was opened. Possible values: data_sources|fields' },
+        _meta: {
+          description: 'Which resource browser was opened. Possible values: data_sources|fields',
+        },
       },
       opened_from: {
         type: 'keyword',
-        _meta: { description: 'Where the browser was opened from. Possible values: autocomplete|badge|unknown' },
+        _meta: {
+          description:
+            'Where the browser was opened from. Possible values: autocomplete|badge|unknown',
+        },
       },
       command_kind: {
         type: 'keyword',
-        _meta: { description: 'For data sources browser: FROM/TS context. Possible values: from|ts|unknown' },
+        _meta: {
+          description:
+            'For data sources browser: FROM/TS context. Possible values: from|ts|unknown',
+        },
       },
     },
   });

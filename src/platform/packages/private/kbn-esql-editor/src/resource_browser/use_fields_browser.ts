@@ -211,7 +211,14 @@ export function useFieldsBrowser({
       updatePopoverPosition();
       setIsFieldsBrowserOpen(true);
     },
-    [editorModel, editorRef, fetchFields, fetchRecommendedFields, updatePopoverPosition, telemetryService]
+    [
+      editorModel,
+      editorRef,
+      fetchFields,
+      fetchRecommendedFields,
+      updatePopoverPosition,
+      telemetryService,
+    ]
   );
 
   const handleFieldsBrowserSelect = useCallback(
