@@ -28,12 +28,19 @@ import {
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
+  ESQL_RESOURCE_BROWSER_OPENED,
+  ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
+
+type ResourceBrowserKind = 'data_sources' | 'fields';
+type ResourceBrowserOpenedFrom = 'autocomplete' | 'badge' | 'unknown';
+type ResourceBrowserCommandKind = 'from' | 'ts' | 'unknown';
+type ResourceBrowserItemAction = 'add' | 'remove';
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -206,6 +213,30 @@ export class ESQLEditorTelemetryService {
     this._reportEvent(ESQL_CONTROL_CANCELLED, {
       control_kind: controlType,
       reason,
+    });
+  }
+
+  public trackResourceBrowserOpened(payload: {
+    browserKind: ResourceBrowserKind;
+    openedFrom: ResourceBrowserOpenedFrom;
+    commandKind?: ResourceBrowserCommandKind;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
+      browser_kind: payload.browserKind,
+      opened_from: payload.openedFrom,
+      command_kind: payload.commandKind ?? 'unknown',
+    });
+  }
+
+  public trackResourceBrowserItemToggled(payload: {
+    browserKind: ResourceBrowserKind;
+    openedFrom: ResourceBrowserOpenedFrom;
+    action: ResourceBrowserItemAction;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
+      browser_kind: payload.browserKind,
+      opened_from: payload.openedFrom,
+      action: payload.action,
     });
   }
 

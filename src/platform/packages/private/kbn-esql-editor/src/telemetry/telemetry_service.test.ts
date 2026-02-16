@@ -9,7 +9,11 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { ESQLEditorTelemetryService } from './telemetry_service';
-import { ESQL_LOOKUP_JOIN_ACTION_SHOWN } from './events_registration';
+import {
+  ESQL_LOOKUP_JOIN_ACTION_SHOWN,
+  ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
+  ESQL_RESOURCE_BROWSER_OPENED,
+} from './events_registration';
 
 describe('ESQLEditorTelemetryService', () => {
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
@@ -152,6 +156,42 @@ describe('ESQLEditorTelemetryService', () => {
           expect.any(Error)
         );
       });
+    });
+  });
+
+  describe('resource browser telemetry', () => {
+    it('tracks browser opened', () => {
+      telemetryService.trackResourceBrowserOpened({
+        browserKind: 'data_sources',
+        openedFrom: 'autocomplete',
+        commandKind: 'from',
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_RESOURCE_BROWSER_OPENED, {
+        browser_kind: 'data_sources',
+        opened_from: 'autocomplete',
+        command_kind: 'from',
+      });
+    });
+
+    it('tracks item toggled without including raw names', () => {
+      telemetryService.trackResourceBrowserItemToggled({
+        browserKind: 'fields',
+        openedFrom: 'autocomplete',
+        action: 'add',
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
+        browser_kind: 'fields',
+        opened_from: 'autocomplete',
+        action: 'add',
+      });
+
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+        string,
+        unknown
+      >;
+      expect(JSON.stringify(payload)).not.toContain('kibana_sample_data_logs');
     });
   });
 });

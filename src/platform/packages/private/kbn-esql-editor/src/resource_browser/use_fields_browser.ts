@@ -23,6 +23,7 @@ import {
 } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
 import type { BrowserPopoverPosition } from './types';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -32,6 +33,7 @@ interface UseFieldsBrowserParams {
   getTimeRange: () => TimeRange;
   signal?: AbortSignal;
   activeSolutionId?: SolutionId;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 export function useFieldsBrowser({
@@ -42,6 +44,7 @@ export function useFieldsBrowser({
   getTimeRange,
   signal,
   activeSolutionId,
+  telemetryService,
 }: UseFieldsBrowserParams) {
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
@@ -155,6 +158,12 @@ export function useFieldsBrowser({
       // an extra async fetch, improving responsiveness.
       const shouldUsePreloaded = Boolean(preloadedFields?.length);
 
+      telemetryService.trackResourceBrowserOpened({
+        browserKind: 'fields',
+        openedFrom: 'autocomplete',
+        commandKind: 'unknown',
+      });
+
       if (shouldUsePreloaded && preloadedFields) {
         const fieldsFromNames: ESQLFieldWithMetadata[] = preloadedFields.map((f) => ({
           name: f.name,
@@ -202,7 +211,7 @@ export function useFieldsBrowser({
       updatePopoverPosition();
       setIsFieldsBrowserOpen(true);
     },
-    [editorModel, editorRef, fetchFields, fetchRecommendedFields, updatePopoverPosition]
+    [editorModel, editorRef, fetchFields, fetchRecommendedFields, updatePopoverPosition, telemetryService]
   );
 
   const handleFieldsBrowserSelect = useCallback(
@@ -213,6 +222,12 @@ export function useFieldsBrowser({
       if (!editor || !model || insertAtOffset == null) {
         return;
       }
+
+      telemetryService.trackResourceBrowserItemToggled({
+        browserKind: 'fields',
+        openedFrom: 'autocomplete',
+        action: change === DataSourceSelectionChange.Add ? 'add' : 'remove',
+      });
 
       const textToInsert = change === DataSourceSelectionChange.Add ? fieldName : '';
 
@@ -228,7 +243,7 @@ export function useFieldsBrowser({
 
       insertedTextLengthRef.current = textToInsert.length;
     },
-    [editorRef, editorModel]
+    [editorRef, editorModel, telemetryService]
   );
 
   return {

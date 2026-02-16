@@ -26,11 +26,13 @@ import {
 import type { BrowserPopoverPosition } from './types';
 import { IndicesBrowserOpenMode } from './types';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {
@@ -48,6 +50,7 @@ export function useDataSourceBrowser({
   editorRef,
   editorModel,
   esqlCallbacks,
+  telemetryService,
 }: UseDataSourceBrowserParams) {
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
@@ -165,6 +168,12 @@ export function useDataSourceBrowser({
           (!isTSCommandRef.current && preloadedSources?.length)
       );
 
+      telemetryService.trackResourceBrowserOpened({
+        browserKind: 'data_sources',
+        openedFrom: openModeRef.current,
+        commandKind: sourceCtx.command ?? 'unknown',
+      });
+
       if (shouldUsePreloaded) {
         const normalized =
           isTSCommandRef.current && preloadedTimeSeriesSources
@@ -206,15 +215,28 @@ export function useDataSourceBrowser({
       // The browser UI emits single-item changes (select/deselect). Reflect that in our local
       // selection ref first
       const previous = selectedSourcesRef.current;
+      const wasSelected = previous.includes(sourceName);
       const newSelectedSources =
         change === DataSourceSelectionChange.Add
-          ? previous.includes(sourceName)
+          ? wasSelected
             ? previous
             : [...previous, sourceName]
           : previous.filter((s) => s !== sourceName);
 
       // Keep selection state in sync with the browser UI even if we can't edit the query.
       selectedSourcesRef.current = newSelectedSources;
+
+      // Only track telemetry for new items, not repeated ones
+      const shouldTrackToggle =
+        (change === DataSourceSelectionChange.Add && !wasSelected) ||
+        (change === DataSourceSelectionChange.Remove && wasSelected);
+      if (shouldTrackToggle) {
+        telemetryService.trackResourceBrowserItemToggled({
+          browserKind: 'data_sources',
+          openedFrom: openModeRef.current,
+          action: change === DataSourceSelectionChange.Add ? 'add' : 'remove',
+        });
+      }
 
       // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources
       // list so we preserve user formatting, spacing, and any unknown sources.
@@ -282,7 +304,7 @@ export function useDataSourceBrowser({
         applyInsert(insertAt, text);
       }
     },
-    [editorRef, editorModel]
+    [editorRef, editorModel, telemetryService]
   );
 
   return {
