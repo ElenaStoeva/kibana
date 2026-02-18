@@ -25,10 +25,16 @@ import {
 import type { BrowserPopoverPosition } from './types';
 import { IndicesBrowserOpenMode } from './types';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
+import {
+  ResourceBrowserType,
+  ResourceBrowserOpenedFrom,
+  type ESQLEditorTelemetryService,
+} from '../telemetry/telemetry_service';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 const normalizeTimeseriesIndices = ({
@@ -44,7 +50,11 @@ const normalizeTimeseriesIndices = ({
   );
 };
 
-export function useDataSourceBrowser({ editorRef, editorModel }: UseDataSourceBrowserParams) {
+export function useDataSourceBrowser({
+  editorRef,
+  editorModel,
+  telemetryService,
+}: UseDataSourceBrowserParams) {
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
 
@@ -154,6 +164,14 @@ export function useDataSourceBrowser({ editorRef, editorModel }: UseDataSourceBr
           (!isTSCommandRef.current && preloadedFromSources?.length)
       );
 
+      telemetryService.trackResourceBrowserOpened({
+        browserType: ResourceBrowserType.DATA_SOURCES,
+        openedFrom:
+          openModeRef.current === IndicesBrowserOpenMode.Badge
+            ? ResourceBrowserOpenedFrom.BADGE
+            : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+      });
+
       // Store any preloaded items for the browser to render immediately. If nothing is preloaded,
       // the browser component will fetch sources on its own.
       if (shouldUsePreloaded) {
@@ -170,7 +188,7 @@ export function useDataSourceBrowser({ editorRef, editorModel }: UseDataSourceBr
 
       setIsDataSourceBrowserOpen(true);
     },
-    [editorModel, editorRef, updatePopoverPosition]
+    [editorModel, editorRef, updatePopoverPosition, telemetryService]
   );
 
   const handleDataSourceBrowserSelect = useCallback(
@@ -186,15 +204,31 @@ export function useDataSourceBrowser({ editorRef, editorModel }: UseDataSourceBr
       // The browser UI emits single-item changes (select/deselect). Reflect that in our local
       // selection ref first
       const previous = selectedSourcesRef.current;
+      const wasSelected = previous.includes(sourceName);
       const newSelectedSources =
         change === DataSourceSelectionChange.Add
-          ? previous.includes(sourceName)
+          ? wasSelected
             ? previous
             : [...previous, sourceName]
           : previous.filter((s) => s !== sourceName);
 
       // Keep selection state in sync with the browser UI even if we can't edit the query.
       selectedSourcesRef.current = newSelectedSources;
+
+      // Only track telemetry for new items, not repeated ones
+      const shouldTrackToggle =
+        (change === DataSourceSelectionChange.Add && !wasSelected) ||
+        (change === DataSourceSelectionChange.Remove && wasSelected);
+      if (shouldTrackToggle) {
+        telemetryService.trackResourceBrowserItemToggled({
+          browserType: ResourceBrowserType.DATA_SOURCES,
+          openedFrom:
+            openModeRef.current === IndicesBrowserOpenMode.Badge
+              ? ResourceBrowserOpenedFrom.BADGE
+              : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+          action: change,
+        });
+      }
 
       // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources
       // list so we preserve user formatting, spacing, and any unknown sources.
@@ -262,7 +296,7 @@ export function useDataSourceBrowser({ editorRef, editorModel }: UseDataSourceBr
         applyInsert(insertAt, text);
       }
     },
-    [editorRef, editorModel]
+    [editorRef, editorModel, telemetryService]
   );
 
   return {
