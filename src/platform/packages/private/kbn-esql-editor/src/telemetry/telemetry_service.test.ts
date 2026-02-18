@@ -10,7 +10,7 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQLEditorTelemetryService,
-  ResourceBrowserKind,
+  ResourceBrowserType,
   ResourceBrowserOpenedFrom,
 } from './telemetry_service';
 import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
@@ -167,7 +167,7 @@ describe('ESQLEditorTelemetryService', () => {
   describe('resource browser telemetry', () => {
     it('tracks browser opened', () => {
       telemetryService.trackResourceBrowserOpened({
-        browserKind: ResourceBrowserKind.DATA_SOURCES,
+        browserKind: ResourceBrowserType.DATA_SOURCES,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
@@ -179,7 +179,7 @@ describe('ESQLEditorTelemetryService', () => {
 
     it('tracks item toggled without including raw names', () => {
       telemetryService.trackResourceBrowserItemToggled({
-        browserKind: ResourceBrowserKind.FIELDS,
+        browserKind: ResourceBrowserType.FIELDS,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
         action: DataSourceSelectionChange.Add,
       });

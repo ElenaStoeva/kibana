@@ -38,7 +38,7 @@ import {
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
 
-export enum ResourceBrowserKind {
+export enum ResourceBrowserType {
   DATA_SOURCES = 'data_sources',
   FIELDS = 'fields',
 }
@@ -222,7 +222,7 @@ export class ESQLEditorTelemetryService {
   }
 
   public trackResourceBrowserOpened(payload: {
-    browserKind: ResourceBrowserKind;
+    browserKind: ResourceBrowserType;
     openedFrom: ResourceBrowserOpenedFrom;
   }) {
     this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
@@ -232,7 +232,7 @@ export class ESQLEditorTelemetryService {
   }
 
   public trackResourceBrowserItemToggled(payload: {
-    browserKind: ResourceBrowserKind;
+    browserKind: ResourceBrowserType;
     openedFrom: ResourceBrowserOpenedFrom;
     action: DataSourceSelectionChange;
   }) {

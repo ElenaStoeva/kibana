@@ -24,7 +24,7 @@ import {
 import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
 import type { BrowserPopoverPosition } from './types';
 import {
-  ResourceBrowserKind,
+  ResourceBrowserType,
   ResourceBrowserOpenedFrom,
   type ESQLEditorTelemetryService,
 } from '../telemetry/telemetry_service';
@@ -163,7 +163,7 @@ export function useFieldsBrowser({
       const shouldUsePreloaded = Boolean(preloadedFields?.length);
 
       telemetryService.trackResourceBrowserOpened({
-        browserKind: ResourceBrowserKind.FIELDS,
+        browserKind: ResourceBrowserType.FIELDS,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
@@ -234,7 +234,7 @@ export function useFieldsBrowser({
       }
 
       telemetryService.trackResourceBrowserItemToggled({
-        browserKind: ResourceBrowserKind.FIELDS,
+        browserKind: ResourceBrowserType.FIELDS,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
         action: change,
       });

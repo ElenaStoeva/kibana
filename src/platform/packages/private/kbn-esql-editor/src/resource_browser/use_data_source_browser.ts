@@ -27,7 +27,7 @@ import type { BrowserPopoverPosition } from './types';
 import { IndicesBrowserOpenMode } from './types';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 import {
-  ResourceBrowserKind,
+  ResourceBrowserType,
   ResourceBrowserOpenedFrom,
   type ESQLEditorTelemetryService,
 } from '../telemetry/telemetry_service';
@@ -173,7 +173,7 @@ export function useDataSourceBrowser({
       );
 
       telemetryService.trackResourceBrowserOpened({
-        browserKind: ResourceBrowserKind.DATA_SOURCES,
+        browserKind: ResourceBrowserType.DATA_SOURCES,
         openedFrom:
           openModeRef.current === IndicesBrowserOpenMode.Badge
             ? ResourceBrowserOpenedFrom.BADGE
@@ -238,7 +238,7 @@ export function useDataSourceBrowser({
         (change === DataSourceSelectionChange.Remove && wasSelected);
       if (shouldTrackToggle) {
         telemetryService.trackResourceBrowserItemToggled({
-          browserKind: ResourceBrowserKind.DATA_SOURCES,
+          browserKind: ResourceBrowserType.DATA_SOURCES,
           openedFrom:
             openModeRef.current === IndicesBrowserOpenMode.Badge
               ? ResourceBrowserOpenedFrom.BADGE
