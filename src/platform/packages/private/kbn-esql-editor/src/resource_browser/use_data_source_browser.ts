@@ -9,7 +9,6 @@
 
 import { useCallback, useRef, useState, type MutableRefObject } from 'react';
 import type {
-  ESQLCallbacks,
   ESQLSourceResult,
   IndicesAutocompleteResult,
   IndexAutocompleteItem,
@@ -30,12 +29,13 @@ import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
-  esqlCallbacks: ESQLCallbacks;
 }
 
-const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {
+const normalizeTimeseriesIndices = ({
+  indices,
+}: Pick<IndicesAutocompleteResult, 'indices'>): ESQLSourceResult[] => {
   return (
-    result.indices?.map((index) => ({
+    indices?.map((index) => ({
       name: index.name,
       type: 'timeseries',
       title: index.name,
@@ -44,16 +44,14 @@ const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSour
   );
 };
 
-export function useDataSourceBrowser({
-  editorRef,
-  editorModel,
-  esqlCallbacks,
-}: UseDataSourceBrowserParams) {
+export function useDataSourceBrowser({ editorRef, editorModel }: UseDataSourceBrowserParams) {
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
 
-  const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
-  const [isLoadingSources, setIsLoadingSources] = useState(false);
+  const [preloadedSources, setPreloadedSources] = useState<ESQLSourceResult[] | undefined>(
+    undefined
+  );
+  const [isTimeseries, setIsTimeseries] = useState(false);
 
   const sourcesRangeRef = useRef<monaco.IRange | undefined>(undefined);
   const isTSCommandRef = useRef(false);
@@ -83,16 +81,6 @@ export function useDataSourceBrowser({
 
     setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
   }, [editorRef]);
-
-  const fetchSources = useCallback(async () => {
-    const { getSources, getTimeseriesIndices } = esqlCallbacks;
-    if (isTSCommandRef.current) {
-      const result = (await getTimeseriesIndices?.()) ?? { indices: [] };
-      return normalizeTimeseriesIndices(result);
-    }
-
-    return (await getSources?.()) ?? [];
-  }, [esqlCallbacks]);
 
   const openIndicesBrowser = useCallback(
     async (options?: {
@@ -130,6 +118,7 @@ export function useDataSourceBrowser({
         openedFrom: openModeRef.current,
       });
       isTSCommandRef.current = sourceCtx.command === 'ts';
+      setIsTimeseries(isTSCommandRef.current);
 
       if (
         typeof sourceCtx.sourcesStartOffset === 'number' &&
@@ -158,31 +147,22 @@ export function useDataSourceBrowser({
 
       // If callers already have sources (e.g. from autocomplete context) we can reuse them to avoid
       // an extra async fetch, improving responsiveness.
-      const preloadedSources = options?.preloadedSources;
+      const preloadedFromSources = options?.preloadedSources;
       const preloadedTimeSeriesSources = options?.preloadedTimeSeriesSources;
       const shouldUsePreloaded = Boolean(
         (isTSCommandRef.current && preloadedTimeSeriesSources?.length) ||
-          (!isTSCommandRef.current && preloadedSources?.length)
+          (!isTSCommandRef.current && preloadedFromSources?.length)
       );
 
+      // Store any preloaded items for the browser to render immediately. If nothing is preloaded,
+      // the browser component will fetch sources on its own.
       if (shouldUsePreloaded) {
-        const normalized =
-          isTSCommandRef.current && preloadedTimeSeriesSources
-            ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources })
-            : preloadedSources ?? [];
-        setAllSources(normalized);
-        setIsLoadingSources(false);
+        const normalized = isTSCommandRef.current
+          ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources ?? [] })
+          : preloadedFromSources ?? [];
+        setPreloadedSources(normalized);
       } else {
-        // Fetch the sources
-        setIsLoadingSources(true);
-        try {
-          const fetched = await fetchSources();
-          setAllSources(fetched);
-        } catch {
-          setAllSources([]);
-        } finally {
-          setIsLoadingSources(false);
-        }
+        setPreloadedSources(undefined);
       }
 
       // Position the popover near the cursor before opening it.
@@ -190,7 +170,7 @@ export function useDataSourceBrowser({
 
       setIsDataSourceBrowserOpen(true);
     },
-    [editorModel, editorRef, updatePopoverPosition, fetchSources]
+    [editorModel, editorRef, updatePopoverPosition]
   );
 
   const handleDataSourceBrowserSelect = useCallback(
@@ -289,8 +269,8 @@ export function useDataSourceBrowser({
     isDataSourceBrowserOpen,
     setIsDataSourceBrowserOpen,
     browserPopoverPosition,
-    allSources,
-    isLoadingSources,
+    preloadedSources,
+    isTimeseries,
     selectedSources: selectedSourcesRef.current,
     openIndicesBrowser,
     handleDataSourceBrowserSelect,

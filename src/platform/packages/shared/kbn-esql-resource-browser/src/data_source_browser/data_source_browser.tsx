@@ -21,11 +21,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLSourceResult } from '@kbn/esql-types';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 import { DataSourceSelectionChange } from '../types';
+import { useAllSources } from './use_all_sources';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
@@ -33,8 +34,15 @@ const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter 
 
 interface DataSourceBrowserProps {
   isOpen: boolean;
-  isLoading: boolean;
-  allSources: ESQLSourceResult[];
+  queryText?: string;
+  isTimeseries?: boolean;
+  /**
+   * Sources passed from autocomplete to render immediately without fetching.
+   * If empty/undefined, the browser will fetch sources using `esqlCallbacks`.
+   */
+  preloadedSources?: ESQLSourceResult[];
+  /** Minimal ES|QL callbacks needed for fetching sources. */
+  esqlCallbacks?: Pick<ESQLCallbacks, 'getSources' | 'getTimeseriesIndices'>;
   selectedSources?: string[];
   onClose: () => void;
   onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
@@ -43,13 +51,22 @@ interface DataSourceBrowserProps {
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
-  isLoading,
-  allSources,
+  queryText,
+  isTimeseries,
+  preloadedSources,
+  esqlCallbacks,
   selectedSources = [],
   onClose,
   onSelect,
   position,
 }) => {
+  const { allSources, isLoading } = useAllSources({
+    isOpen,
+    preloadedSources,
+    esqlCallbacks,
+    queryText,
+    isTimeseries,
+  });
   const { euiTheme } = useEuiTheme();
 
   const [searchValue, setSearchValue] = useState('');

@@ -677,15 +677,14 @@ const ESQLEditorInternal = function ESQLEditor({
     isDataSourceBrowserOpen,
     setIsDataSourceBrowserOpen,
     browserPopoverPosition: dataSourceBrowserPosition,
-    allSources,
-    isLoadingSources,
+    preloadedSources,
+    isTimeseries,
     selectedSources,
     openIndicesBrowser,
     handleDataSourceBrowserSelect,
   } = useDataSourceBrowser({
     editorRef,
     editorModel,
-    esqlCallbacks,
   });
 
   const { addSourcesDecorator, sourcesBadgeStyle, sourcesLabelClickHandler } = useSourcesBadge({
@@ -698,18 +697,15 @@ const ESQLEditorInternal = function ESQLEditor({
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
     browserPopoverPosition: fieldsBrowserPosition,
-    allFields,
-    recommendedFields,
-    isLoadingFields,
+    preloadedFields,
+    simplifiedQuery,
+    fullQuery,
     openFieldsBrowser,
     handleFieldsBrowserSelect,
   } = useFieldsBrowser({
     editorRef,
     editorModel,
     http: core.http,
-    search: data.search.search,
-    getTimeRange: () => data.query.timefilter.timefilter.getTime(),
-    signal: abortControllerRef.current.signal,
     activeSolutionId: activeSolutionId ?? undefined,
   });
 
@@ -1414,8 +1410,10 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}
-            isLoading={isLoadingSources}
-            allSources={allSources}
+            queryText={fullQuery}
+            isTimeseries={isTimeseries}
+            preloadedSources={preloadedSources}
+            esqlCallbacks={esqlCallbacks}
             selectedSources={selectedSources}
             position={dataSourceBrowserPosition}
             onSelect={handleDataSourceBrowserSelect}
@@ -1427,9 +1425,14 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
-            isLoading={isLoadingFields}
-            allFields={allFields}
-            recommendedFields={recommendedFields}
+            preloadedFields={preloadedFields}
+            simplifiedQuery={simplifiedQuery}
+            fullQuery={fullQuery}
+            http={core.http}
+            activeSolutionId={activeSolutionId ?? undefined}
+            search={data.search.search}
+            getTimeRange={() => data.query.timefilter.timefilter.getTime()}
+            signal={abortControllerRef.current.signal}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
             onClose={() => setIsFieldsBrowserOpen(false)}

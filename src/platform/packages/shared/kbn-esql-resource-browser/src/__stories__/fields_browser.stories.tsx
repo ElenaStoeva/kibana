@@ -48,10 +48,8 @@ export default meta;
 type Story = StoryObj<typeof FieldsBrowser>;
 
 const InteractiveWrapper = ({
-  isLoading = false,
   recommendedFields = [],
 }: {
-  isLoading?: boolean;
   recommendedFields?: RecommendedField[];
 }) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -59,7 +57,6 @@ const InteractiveWrapper = ({
   return (
     <FieldsBrowser
       isOpen={isOpen}
-      isLoading={isLoading}
       onClose={() => {
         setIsOpen(false);
         action('onClose')();
@@ -67,7 +64,7 @@ const InteractiveWrapper = ({
       onSelect={(fieldName, change) => {
         action('onSelect')(fieldName, change);
       }}
-      allFields={mockFields}
+      preloadedFields={mockFields.map((f) => ({ name: f.name, type: f.type }))}
       recommendedFields={recommendedFields}
       position={{ top: 100, left: 100 }}
     />

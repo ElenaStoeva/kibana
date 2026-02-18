@@ -15,30 +15,74 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
+import type { HttpStart } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { DataSourceSelectionChange } from '../types';
 import { FIELDS_BROWSER_I18N_KEYS } from './i18n';
 import { getFieldTypeLabel, getFieldTypeIconType } from './utils';
+import { useAllFields } from './use_all_fields';
 
 interface FieldsBrowserProps {
   isOpen: boolean;
-  isLoading: boolean;
   onClose: () => void;
   onSelect: (fieldName: string, change: DataSourceSelectionChange) => void;
-  allFields: ESQLFieldWithMetadata[];
-  recommendedFields: RecommendedField[];
+  /**
+   * Fields passed from autocomplete to render immediately without fetching.
+   * If empty/undefined, the browser will fetch fields using `getEsqlColumns` when possible.
+   */
+  preloadedFields?: Array<{ name: string; type?: string }>;
+  /**
+   * ES|QL query text used for fetching fields when `preloadedFields` is not provided.
+   *
+   * Note: In the ES|QL editor integration this is the final query passed to `getEsqlColumns`
+   * (either the simplified pipeline query, or a fallback `FROM ${indexPattern}` when the query
+   * has no sources).
+   */
+  simplifiedQuery?: string;
+  /** Optional query used for fetching recommended fields; defaults to `fullQuery` then `simplifiedQuery`. */
+  fullQuery?: string;
+  http?: HttpStart;
+  activeSolutionId?: SolutionId;
+  /** Search service used by `getEsqlColumns` when fetching fields. */
+  search?: ISearchGeneric;
+  /** Time range provider used by `getEsqlColumns` when fetching fields. */
+  getTimeRange?: () => TimeRange;
+  signal?: AbortSignal;
+  /** Optional preloaded recommended fields. If provided, no fetching will occur. */
+  recommendedFields?: RecommendedField[];
   position?: { top?: number; left?: number };
 }
 
 export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   isOpen,
-  isLoading,
   onClose,
   onSelect,
-  allFields,
-  recommendedFields,
+  preloadedFields,
+  simplifiedQuery,
+  fullQuery,
+  http,
+  activeSolutionId,
+  search,
+  getTimeRange,
+  signal,
+  recommendedFields: preloadedRecommendedFields,
   position,
 }) => {
+  const { allFields, recommendedFields, isLoading } = useAllFields({
+    isOpen,
+    preloadedFields,
+    preloadedRecommendedFields,
+    simplifiedQuery,
+    fullQuery,
+    http,
+    activeSolutionId,
+    search,
+    getTimeRange,
+    signal,
+  });
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);

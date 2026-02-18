@@ -44,7 +44,6 @@ const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string
   return (
     <DataSourceBrowser
       isOpen={isOpen}
-      isLoading={false}
       onClose={() => {
         setIsOpen(false);
         action('onClose')();
@@ -52,7 +51,7 @@ const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string
       onSelect={(sourceName, change) => {
         action('onSelect')({ sourceName, change });
       }}
-      allSources={mockDataSources}
+      preloadedSources={mockDataSources}
       selectedSources={selectedSources}
       position={{ top: 100, left: 100 }}
     />
