@@ -23,7 +23,11 @@ import {
 } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
 import type { BrowserPopoverPosition } from './types';
-import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import {
+  ResourceBrowserKind,
+  ResourceBrowserOpenedFrom,
+  type ESQLEditorTelemetryService,
+} from '../telemetry/telemetry_service';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -159,9 +163,8 @@ export function useFieldsBrowser({
       const shouldUsePreloaded = Boolean(preloadedFields?.length);
 
       telemetryService.trackResourceBrowserOpened({
-        browserKind: 'fields',
-        openedFrom: 'autocomplete',
-        commandKind: 'unknown',
+        browserKind: ResourceBrowserKind.FIELDS,
+        openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
       if (shouldUsePreloaded && preloadedFields) {
@@ -231,9 +234,9 @@ export function useFieldsBrowser({
       }
 
       telemetryService.trackResourceBrowserItemToggled({
-        browserKind: 'fields',
-        openedFrom: 'autocomplete',
-        action: change === DataSourceSelectionChange.Add ? 'add' : 'remove',
+        browserKind: ResourceBrowserKind.FIELDS,
+        openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+        action: change,
       });
 
       const textToInsert = change === DataSourceSelectionChange.Add ? fieldName : '';

@@ -26,7 +26,11 @@ import {
 import type { BrowserPopoverPosition } from './types';
 import { IndicesBrowserOpenMode } from './types';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
-import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import {
+  ResourceBrowserKind,
+  ResourceBrowserOpenedFrom,
+  type ESQLEditorTelemetryService,
+} from '../telemetry/telemetry_service';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -169,9 +173,11 @@ export function useDataSourceBrowser({
       );
 
       telemetryService.trackResourceBrowserOpened({
-        browserKind: 'data_sources',
-        openedFrom: openModeRef.current,
-        commandKind: sourceCtx.command ?? 'unknown',
+        browserKind: ResourceBrowserKind.DATA_SOURCES,
+        openedFrom:
+          openModeRef.current === IndicesBrowserOpenMode.Badge
+            ? ResourceBrowserOpenedFrom.BADGE
+            : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
       if (shouldUsePreloaded) {
@@ -199,7 +205,7 @@ export function useDataSourceBrowser({
 
       setIsDataSourceBrowserOpen(true);
     },
-    [editorModel, editorRef, updatePopoverPosition, fetchSources]
+    [editorModel, editorRef, updatePopoverPosition, fetchSources, telemetryService]
   );
 
   const handleDataSourceBrowserSelect = useCallback(
@@ -232,9 +238,12 @@ export function useDataSourceBrowser({
         (change === DataSourceSelectionChange.Remove && wasSelected);
       if (shouldTrackToggle) {
         telemetryService.trackResourceBrowserItemToggled({
-          browserKind: 'data_sources',
-          openedFrom: openModeRef.current,
-          action: change === DataSourceSelectionChange.Add ? 'add' : 'remove',
+          browserKind: ResourceBrowserKind.DATA_SOURCES,
+          openedFrom:
+            openModeRef.current === IndicesBrowserOpenMode.Badge
+              ? ResourceBrowserOpenedFrom.BADGE
+              : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+          action: change,
         });
       }
 

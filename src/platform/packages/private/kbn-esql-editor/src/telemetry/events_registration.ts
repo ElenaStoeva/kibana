@@ -214,7 +214,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_RESOURCE_BROWSER_OPENED,
     schema: {
-      browser_kind: {
+      browser_type: {
         type: 'keyword',
         _meta: {
           description: 'Which resource browser was opened. Possible values: data_sources|fields',
@@ -223,15 +223,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       opened_from: {
         type: 'keyword',
         _meta: {
-          description:
-            'Where the browser was opened from. Possible values: autocomplete|badge|unknown',
-        },
-      },
-      command_kind: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'For data sources browser: FROM/TS context. Possible values: from|ts|unknown',
+          description: 'Where the browser was opened from. Possible values: autocomplete|badge',
         },
       },
     },
@@ -240,13 +232,13 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
     schema: {
-      browser_kind: {
+      browser_type: {
         type: 'keyword',
         _meta: { description: 'Which resource browser emitted the toggle. data_sources|fields' },
       },
       opened_from: {
         type: 'keyword',
-        _meta: { description: 'Where the browser was opened from. autocomplete|badge|unknown' },
+        _meta: { description: 'Where the browser was opened from. autocomplete|badge' },
       },
       action: {
         type: 'keyword',

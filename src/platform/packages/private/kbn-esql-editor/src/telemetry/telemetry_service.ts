@@ -20,6 +20,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
@@ -37,10 +38,14 @@ import {
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
 
-type ResourceBrowserKind = 'data_sources' | 'fields';
-type ResourceBrowserOpenedFrom = 'autocomplete' | 'badge' | 'unknown';
-type ResourceBrowserCommandKind = 'from' | 'ts' | 'unknown';
-type ResourceBrowserItemAction = 'add' | 'remove';
+export enum ResourceBrowserKind {
+  DATA_SOURCES = 'data_sources',
+  FIELDS = 'fields',
+}
+export enum ResourceBrowserOpenedFrom {
+  AUTOCOMPLETE = 'autocomplete',
+  BADGE = 'badge',
+}
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -219,22 +224,20 @@ export class ESQLEditorTelemetryService {
   public trackResourceBrowserOpened(payload: {
     browserKind: ResourceBrowserKind;
     openedFrom: ResourceBrowserOpenedFrom;
-    commandKind?: ResourceBrowserCommandKind;
   }) {
     this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
-      browser_kind: payload.browserKind,
+      browser_type: payload.browserKind,
       opened_from: payload.openedFrom,
-      command_kind: payload.commandKind ?? 'unknown',
     });
   }
 
   public trackResourceBrowserItemToggled(payload: {
     browserKind: ResourceBrowserKind;
     openedFrom: ResourceBrowserOpenedFrom;
-    action: ResourceBrowserItemAction;
+    action: DataSourceSelectionChange;
   }) {
     this._reportEvent(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
-      browser_kind: payload.browserKind,
+      browser_type: payload.browserKind,
       opened_from: payload.openedFrom,
       action: payload.action,
     });
