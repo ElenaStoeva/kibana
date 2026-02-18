@@ -222,22 +222,22 @@ export class ESQLEditorTelemetryService {
   }
 
   public trackResourceBrowserOpened(payload: {
-    browserKind: ResourceBrowserType;
+    browserType: ResourceBrowserType;
     openedFrom: ResourceBrowserOpenedFrom;
   }) {
     this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
-      browser_type: payload.browserKind,
+      browser_type: payload.browserType,
       opened_from: payload.openedFrom,
     });
   }
 
   public trackResourceBrowserItemToggled(payload: {
-    browserKind: ResourceBrowserType;
+    browserType: ResourceBrowserType;
     openedFrom: ResourceBrowserOpenedFrom;
     action: DataSourceSelectionChange;
   }) {
     this._reportEvent(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
-      browser_type: payload.browserKind,
+      browser_type: payload.browserType,
       opened_from: payload.openedFrom,
       action: payload.action,
     });

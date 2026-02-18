@@ -173,7 +173,7 @@ export function useDataSourceBrowser({
       );
 
       telemetryService.trackResourceBrowserOpened({
-        browserKind: ResourceBrowserType.DATA_SOURCES,
+        browserType: ResourceBrowserType.DATA_SOURCES,
         openedFrom:
           openModeRef.current === IndicesBrowserOpenMode.Badge
             ? ResourceBrowserOpenedFrom.BADGE
@@ -238,7 +238,7 @@ export function useDataSourceBrowser({
         (change === DataSourceSelectionChange.Remove && wasSelected);
       if (shouldTrackToggle) {
         telemetryService.trackResourceBrowserItemToggled({
-          browserKind: ResourceBrowserType.DATA_SOURCES,
+          browserType: ResourceBrowserType.DATA_SOURCES,
           openedFrom:
             openModeRef.current === IndicesBrowserOpenMode.Badge
               ? ResourceBrowserOpenedFrom.BADGE

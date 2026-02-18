@@ -167,7 +167,7 @@ describe('ESQLEditorTelemetryService', () => {
   describe('resource browser telemetry', () => {
     it('tracks browser opened', () => {
       telemetryService.trackResourceBrowserOpened({
-        browserKind: ResourceBrowserType.DATA_SOURCES,
+        browserType: ResourceBrowserType.DATA_SOURCES,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
@@ -179,7 +179,7 @@ describe('ESQLEditorTelemetryService', () => {
 
     it('tracks item toggled without including raw names', () => {
       telemetryService.trackResourceBrowserItemToggled({
-        browserKind: ResourceBrowserType.FIELDS,
+        browserType: ResourceBrowserType.FIELDS,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
         action: DataSourceSelectionChange.Add,
       });

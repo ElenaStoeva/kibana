@@ -163,7 +163,7 @@ export function useFieldsBrowser({
       const shouldUsePreloaded = Boolean(preloadedFields?.length);
 
       telemetryService.trackResourceBrowserOpened({
-        browserKind: ResourceBrowserType.FIELDS,
+        browserType: ResourceBrowserType.FIELDS,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
@@ -234,7 +234,7 @@ export function useFieldsBrowser({
       }
 
       telemetryService.trackResourceBrowserItemToggled({
-        browserKind: ResourceBrowserType.FIELDS,
+        browserType: ResourceBrowserType.FIELDS,
         openedFrom: ResourceBrowserOpenedFrom.AUTOCOMPLETE,
         action: change,
       });
