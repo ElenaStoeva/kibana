@@ -37,11 +37,9 @@ interface UseDataSourceBrowserParams {
   telemetryService: ESQLEditorTelemetryService;
 }
 
-const normalizeTimeseriesIndices = ({
-  indices,
-}: Pick<IndicesAutocompleteResult, 'indices'>): ESQLSourceResult[] => {
+const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {
   return (
-    indices?.map((index) => ({
+    result.indices?.map((index) => ({
       name: index.name,
       type: 'timeseries',
       title: index.name,
@@ -58,17 +56,13 @@ export function useDataSourceBrowser({
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
 
-  const [preloadedSources, setPreloadedSources] = useState<ESQLSourceResult[] | undefined>(
-    undefined
-  );
-  const [isTimeseries, setIsTimeseries] = useState(false);
-
   const sourcesRangeRef = useRef<monaco.IRange | undefined>(undefined);
   const isTSCommandRef = useRef(false);
   const openModeRef = useRef<IndicesBrowserOpenMode>(IndicesBrowserOpenMode.Autocomplete);
   const openCursorOffsetRef = useRef<number | undefined>(undefined);
   const insertionOffsetRef = useRef<number | undefined>(undefined);
   const selectedSourcesRef = useRef<string[]>([]);
+  const preloadedSourcesRef = useRef<ESQLSourceResult[]>([]);
 
   const updatePopoverPosition = useCallback(() => {
     const editor = editorRef.current;
@@ -128,7 +122,6 @@ export function useDataSourceBrowser({
         openedFrom: openModeRef.current,
       });
       isTSCommandRef.current = sourceCtx.command === 'ts';
-      setIsTimeseries(isTSCommandRef.current);
 
       if (
         typeof sourceCtx.sourcesStartOffset === 'number' &&
@@ -159,10 +152,6 @@ export function useDataSourceBrowser({
       // an extra async fetch, improving responsiveness.
       const preloadedFromSources = options?.preloadedSources;
       const preloadedTimeSeriesSources = options?.preloadedTimeSeriesSources;
-      const shouldUsePreloaded = Boolean(
-        (isTSCommandRef.current && preloadedTimeSeriesSources?.length) ||
-          (!isTSCommandRef.current && preloadedFromSources?.length)
-      );
 
       telemetryService.trackResourceBrowserOpened({
         browserType: ResourceBrowserType.DATA_SOURCES,
@@ -174,13 +163,15 @@ export function useDataSourceBrowser({
 
       // Store any preloaded items for the browser to render immediately. If nothing is preloaded,
       // the browser component will fetch sources on its own.
+      const shouldUsePreloaded = Boolean(
+        (isTSCommandRef.current && preloadedTimeSeriesSources?.length) ||
+          (!isTSCommandRef.current && preloadedFromSources?.length)
+      );
       if (shouldUsePreloaded) {
         const normalized = isTSCommandRef.current
           ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources ?? [] })
           : preloadedFromSources ?? [];
-        setPreloadedSources(normalized);
-      } else {
-        setPreloadedSources(undefined);
+        preloadedSourcesRef.current = normalized;
       }
 
       // Position the popover near the cursor before opening it.
@@ -303,8 +294,8 @@ export function useDataSourceBrowser({
     isDataSourceBrowserOpen,
     setIsDataSourceBrowserOpen,
     browserPopoverPosition,
-    preloadedSources,
-    isTimeseries,
+    preloadedSources: preloadedSourcesRef.current,
+    isTimeseries: isTSCommandRef.current,
     selectedSources: selectedSourcesRef.current,
     openIndicesBrowser,
     handleDataSourceBrowserSelect,

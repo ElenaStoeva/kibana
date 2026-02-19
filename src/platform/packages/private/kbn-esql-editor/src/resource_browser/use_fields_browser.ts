@@ -43,18 +43,19 @@ export function useFieldsBrowser({
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
 
-  const [preloadedFields, setPreloadedFields] = useState<Array<{ name: string; type?: string }>>(
-    []
-  );
-  const [simplifiedQuery, setSimplifiedQuery] = useState<string>('');
-  const [fullQuery, setFullQuery] = useState<string>('');
-
   // Offset where we start inserting the selected field.
   // We keep this stable for the lifetime of an open popover session.
   const insertAnchorOffsetRef = useRef<number | undefined>(undefined);
   // Length of the currently inserted text at the anchor. Used so we can replace our own inserted
   // segment when selection changes without scanning/re-parsing the query.
   const insertedTextLengthRef = useRef(0);
+  // Field names suggested by autocomplete (passed via command args). When present, we use them to
+  // filter the browser list to the contextually relevant fields.
+  const preloadedFieldsRef = useRef<Array<{ name: string; type?: string }>>([]);
+  // ES|QL query text used for fetching fields when `preloadedFields` is not provided. Contains only the sources part (e.g. "FROM index1, index2").
+  const simplifiedQueryRef = useRef<string>('');
+  // Full ES|QL query text used for fetching recommended fields.
+  const fullQueryRef = useRef<string>('');
 
   const updatePopoverPosition = useCallback(() => {
     const editor = editorRef.current;
@@ -86,10 +87,13 @@ export function useFieldsBrowser({
 
       // Reset per-open-session state.
       insertedTextLengthRef.current = 0;
-      setPreloadedFields(options?.preloadedFields ?? []);
+      preloadedFieldsRef.current = options?.preloadedFields ?? [];
 
+      // Snapshot the full query text.
       const fullText = model.getValue() || '';
-      setFullQuery(fullText);
+      fullQueryRef.current = fullText;
+
+      // Snapshot the simplified query text.
       const simplified = getQueryWithoutLastPipe(fullText);
       const mainSources = getLocatedSourceItemsFromQuery(simplified)
         .map((s) => s.name)
@@ -99,11 +103,11 @@ export function useFieldsBrowser({
         : DEFAULT_FIELDS_BROWSER_INDEX;
       const esqlQuery =
         simplified.trim() && mainSources.length ? simplified.trim() : `FROM ${indexPattern}`;
+      simplifiedQueryRef.current = esqlQuery;
 
-      setSimplifiedQuery(esqlQuery);
+      // Snapshot the cursor offset.
       const cursorPosition = editor.getPosition();
       if (!cursorPosition) return;
-
       const cursorOffset = model.getOffsetAt(cursorPosition);
       insertAnchorOffsetRef.current = cursorOffset;
 
@@ -154,9 +158,9 @@ export function useFieldsBrowser({
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
     browserPopoverPosition,
-    preloadedFields,
-    simplifiedQuery,
-    fullQuery,
+    preloadedFields: preloadedFieldsRef.current,
+    simplifiedQuery: simplifiedQueryRef.current,
+    fullQuery: fullQueryRef.current,
     openFieldsBrowser,
     handleFieldsBrowserSelect,
   };

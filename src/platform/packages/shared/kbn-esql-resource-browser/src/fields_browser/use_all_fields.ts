@@ -56,12 +56,9 @@ export const useAllFields = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    const queryForRecommendations = (fullQuery ?? simplifiedQuery ?? '').trim();
-    const canFetchRecommendations = Boolean(http && activeSolutionId && queryForRecommendations);
-    if (!canFetchRecommendations) {
-      setRecommendedFields([]);
-    } else {
-      getEditorExtensions(http!, queryForRecommendations, activeSolutionId!).then((extensions) => {
+    const canFetchRecommendations = Boolean(http && activeSolutionId && fullQuery);
+    if (canFetchRecommendations) {
+      getEditorExtensions(http!, fullQuery, activeSolutionId!).then((extensions) => {
         if (isMountedRef.current) {
           setRecommendedFields(extensions?.recommendedFields ?? []);
         }
@@ -75,14 +72,11 @@ export const useAllFields = ({
         userDefined: false,
       }));
       setAllFields(fieldsFromNames);
-      setIsLoading(false);
       return;
     }
 
     const canFetch = Boolean(simplifiedQuery && search && getTimeRange);
     if (!canFetch) {
-      setAllFields([]);
-      setIsLoading(false);
       return;
     }
 

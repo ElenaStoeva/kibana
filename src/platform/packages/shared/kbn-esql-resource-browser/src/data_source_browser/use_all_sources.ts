@@ -52,7 +52,6 @@ export const useAllSources = ({
 
     if (preloadedSources?.length) {
       setAllSources(preloadedSources);
-      setIsLoading(false);
       return;
     }
 
