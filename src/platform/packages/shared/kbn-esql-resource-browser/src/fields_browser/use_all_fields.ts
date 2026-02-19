@@ -14,16 +14,12 @@ import type { TimeRange } from '@kbn/es-query';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getEditorExtensions, getEsqlColumns } from '@kbn/esql-utils';
-// `simplifiedQuery` is expected to be the final ES|QL query passed to `getEsqlColumns`
-// (e.g. "FROM logs-*" or a simplified pipeline), computed by the consumer.
 
 export interface UseAllFieldsParams {
   isOpen: boolean;
-  preloadedFields?: Array<{ name: string; type?: string }>;
-  preloadedRecommendedFields?: RecommendedField[];
-  simplifiedQuery?: string;
-  /** Query used for deriving recommended fields; defaults to `fullQuery` then `simplifiedQuery`. */
-  fullQuery?: string;
+  preloadedFields: Array<{ name: string; type?: string }>;
+  simplifiedQuery: string;
+  fullQuery: string;
   http?: HttpStart;
   activeSolutionId?: SolutionId;
   search?: ISearchGeneric;
@@ -34,7 +30,6 @@ export interface UseAllFieldsParams {
 export const useAllFields = ({
   isOpen,
   preloadedFields,
-  preloadedRecommendedFields,
   simplifiedQuery,
   fullQuery,
   http,
@@ -61,21 +56,16 @@ export const useAllFields = ({
 
   useEffect(() => {
     if (!isOpen) return;
-
-    if (preloadedRecommendedFields) {
-      setRecommendedFields(preloadedRecommendedFields);
+    const queryForRecommendations = (fullQuery ?? simplifiedQuery ?? '').trim();
+    const canFetchRecommendations = Boolean(http && activeSolutionId && queryForRecommendations);
+    if (!canFetchRecommendations) {
+      setRecommendedFields([]);
     } else {
-      const queryForRecommendations = (fullQuery ?? simplifiedQuery ?? '').trim();
-      const canFetchRecommendations = Boolean(http && activeSolutionId && queryForRecommendations);
-      if (!canFetchRecommendations) {
-        setRecommendedFields([]);
-      } else {
-        getEditorExtensions(http!, queryForRecommendations, activeSolutionId!).then((extensions) => {
-          if (isMountedRef.current) {
-            setRecommendedFields(extensions?.recommendedFields ?? []);
-          }
-        });
-      }
+      getEditorExtensions(http!, queryForRecommendations, activeSolutionId!).then((extensions) => {
+        if (isMountedRef.current) {
+          setRecommendedFields(extensions?.recommendedFields ?? []);
+        }
+      });
     }
 
     if (preloadedFields?.length) {
@@ -120,7 +110,6 @@ export const useAllFields = ({
     http,
     isOpen,
     preloadedFields,
-    preloadedRecommendedFields,
     simplifiedQuery,
     fullQuery,
     search,
@@ -129,4 +118,3 @@ export const useAllFields = ({
 
   return { allFields, recommendedFields, isLoading };
 };
-

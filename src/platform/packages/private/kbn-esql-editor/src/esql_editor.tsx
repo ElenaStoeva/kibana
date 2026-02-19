@@ -1453,7 +1453,6 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}
-            queryText={fullQuery}
             isTimeseries={isTimeseries}
             preloadedSources={preloadedSources}
             esqlCallbacks={esqlCallbacks}

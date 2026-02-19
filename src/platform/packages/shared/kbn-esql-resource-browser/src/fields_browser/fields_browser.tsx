@@ -12,7 +12,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
 import type { HttpStart } from '@kbn/core/public';
@@ -33,17 +33,11 @@ interface FieldsBrowserProps {
    * Fields passed from autocomplete to render immediately without fetching.
    * If empty/undefined, the browser will fetch fields using `getEsqlColumns` when possible.
    */
-  preloadedFields?: Array<{ name: string; type?: string }>;
-  /**
-   * ES|QL query text used for fetching fields when `preloadedFields` is not provided.
-   *
-   * Note: In the ES|QL editor integration this is the final query passed to `getEsqlColumns`
-   * (either the simplified pipeline query, or a fallback `FROM ${indexPattern}` when the query
-   * has no sources).
-   */
-  simplifiedQuery?: string;
-  /** Optional query used for fetching recommended fields; defaults to `fullQuery` then `simplifiedQuery`. */
-  fullQuery?: string;
+  preloadedFields: Array<{ name: string; type?: string }>;
+  /** ES|QL query text used for fetching fields when `preloadedFields` is not provided. Contains only the sources part (e.g. "FROM index1, index2"). */
+  simplifiedQuery: string;
+  /** Full ES|QL query text used for fetching recommended fields. */
+  fullQuery: string;
   http?: HttpStart;
   activeSolutionId?: SolutionId;
   /** Search service used by `getEsqlColumns` when fetching fields. */
@@ -51,8 +45,6 @@ interface FieldsBrowserProps {
   /** Time range provider used by `getEsqlColumns` when fetching fields. */
   getTimeRange?: () => TimeRange;
   signal?: AbortSignal;
-  /** Optional preloaded recommended fields. If provided, no fetching will occur. */
-  recommendedFields?: RecommendedField[];
   position?: { top?: number; left?: number };
 }
 
@@ -68,13 +60,11 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   search,
   getTimeRange,
   signal,
-  recommendedFields: preloadedRecommendedFields,
   position,
 }) => {
   const { allFields, recommendedFields, isLoading } = useAllFields({
     isOpen,
     preloadedFields,
-    preloadedRecommendedFields,
     simplifiedQuery,
     fullQuery,
     http,

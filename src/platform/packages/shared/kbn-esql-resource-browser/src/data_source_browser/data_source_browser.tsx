@@ -34,8 +34,7 @@ const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter 
 
 interface DataSourceBrowserProps {
   isOpen: boolean;
-  queryText?: string;
-  isTimeseries?: boolean;
+  isTimeseries: boolean;
   /**
    * Sources passed from autocomplete to render immediately without fetching.
    * If empty/undefined, the browser will fetch sources using `esqlCallbacks`.
@@ -51,7 +50,6 @@ interface DataSourceBrowserProps {
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
-  queryText,
   isTimeseries,
   preloadedSources,
   esqlCallbacks,
@@ -64,7 +62,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     isOpen,
     preloadedSources,
     esqlCallbacks,
-    queryText,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();

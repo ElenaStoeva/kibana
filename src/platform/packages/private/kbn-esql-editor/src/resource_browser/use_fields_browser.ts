@@ -43,9 +43,9 @@ export function useFieldsBrowser({
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
 
-  const [preloadedFields, setPreloadedFields] = useState<
-    Array<{ name: string; type?: string }> | undefined
-  >(undefined);
+  const [preloadedFields, setPreloadedFields] = useState<Array<{ name: string; type?: string }>>(
+    []
+  );
   const [simplifiedQuery, setSimplifiedQuery] = useState<string>('');
   const [fullQuery, setFullQuery] = useState<string>('');
 
@@ -86,7 +86,7 @@ export function useFieldsBrowser({
 
       // Reset per-open-session state.
       insertedTextLengthRef.current = 0;
-      setPreloadedFields(options?.preloadedFields);
+      setPreloadedFields(options?.preloadedFields ?? []);
 
       const fullText = model.getValue() || '';
       setFullQuery(fullText);

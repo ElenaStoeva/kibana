@@ -8,11 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type {
-  ESQLCallbacks,
-  ESQLSourceResult,
-  IndicesAutocompleteResult,
-} from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLSourceResult, IndicesAutocompleteResult } from '@kbn/esql-types';
 
 const normalizeTimeseriesIndices = ({
   indices,
@@ -31,7 +27,6 @@ export interface UseAllSourcesParams {
   isOpen: boolean;
   preloadedSources?: ESQLSourceResult[];
   esqlCallbacks?: Pick<ESQLCallbacks, 'getSources' | 'getTimeseriesIndices'>;
-  queryText?: string;
   isTimeseries: boolean;
 }
 
@@ -39,7 +34,6 @@ export const useAllSources = ({
   isOpen,
   preloadedSources,
   esqlCallbacks,
-  queryText,
   isTimeseries,
 }: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
   const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
@@ -81,14 +75,7 @@ export const useAllSources = ({
     };
 
     fetchSources();
-  }, [
-    esqlCallbacks,
-    isTimeseries,
-    isOpen,
-    preloadedSources,
-    queryText,
-  ]);
+  }, [esqlCallbacks, isTimeseries, isOpen, preloadedSources]);
 
   return { allSources, isLoading };
 };
-
