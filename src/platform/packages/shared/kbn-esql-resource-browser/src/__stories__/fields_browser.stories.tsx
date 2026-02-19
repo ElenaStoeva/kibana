@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { FieldsBrowser } from '../fields_browser';
 
 const mockFields: ESQLFieldWithMetadata[] = [
