@@ -54,6 +54,7 @@ const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string
       preloadedSources={mockDataSources}
       selectedSources={selectedSources}
       position={{ top: 100, left: 100 }}
+      isTimeseries={false}
     />
   );
 };

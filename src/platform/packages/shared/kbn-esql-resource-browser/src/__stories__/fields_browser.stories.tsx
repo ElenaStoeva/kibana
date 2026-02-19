@@ -47,11 +47,7 @@ const meta: Meta<typeof FieldsBrowser> = {
 export default meta;
 type Story = StoryObj<typeof FieldsBrowser>;
 
-const InteractiveWrapper = ({
-  recommendedFields = [],
-}: {
-  recommendedFields?: RecommendedField[];
-}) => {
+const InteractiveWrapper = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -65,7 +61,8 @@ const InteractiveWrapper = ({
         action('onSelect')(fieldName, change);
       }}
       preloadedFields={mockFields.map((f) => ({ name: f.name, type: f.type }))}
-      recommendedFields={recommendedFields}
+      simplifiedQuery="FROM index1, index2"
+      fullQuery="FROM index1, index2"
       position={{ top: 100, left: 100 }}
     />
   );
@@ -73,8 +70,4 @@ const InteractiveWrapper = ({
 
 export const Default: Story = {
   render: () => <InteractiveWrapper />,
-};
-
-export const WithRecommendedFields: Story = {
-  render: () => <InteractiveWrapper recommendedFields={mockRecommendedFields} />,
 };
