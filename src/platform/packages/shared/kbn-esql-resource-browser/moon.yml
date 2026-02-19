@@ -22,6 +22,11 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/react-field'
   - '@kbn/field-utils'
+  - '@kbn/core'
+  - '@kbn/es-query'
+  - '@kbn/projects-solutions-groups'
+  - '@kbn/search-types'
+  - '@kbn/esql-utils'
 tags:
   - shared-browser
   - package
