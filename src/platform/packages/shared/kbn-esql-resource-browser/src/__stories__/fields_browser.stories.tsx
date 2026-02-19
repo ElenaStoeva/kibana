@@ -26,13 +26,6 @@ const mockFields: ESQLFieldWithMetadata[] = [
   { name: 'tags', type: 'keyword', userDefined: false },
 ];
 
-const mockRecommendedFields: RecommendedField[] = [
-  { name: '@timestamp', pattern: 'logs-*' },
-  { name: 'message', pattern: 'logs-*' },
-  { name: 'host.name', pattern: 'logs-*' },
-  { name: 'bytes', pattern: 'logs-*' },
-];
-
 const meta: Meta<typeof FieldsBrowser> = {
   title: 'ES|QL Resource Browser/Fields Browser',
   component: FieldsBrowser,
