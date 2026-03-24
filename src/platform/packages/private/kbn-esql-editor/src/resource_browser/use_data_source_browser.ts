@@ -164,8 +164,8 @@ export function useDataSourceBrowser({
       // Store any preloaded items for the browser to render immediately. If nothing is preloaded,
       // the browser component will fetch sources on its own.
       const shouldUsePreloaded = Boolean(
-        (isTSCommandRef.current && preloadedTimeSeriesSources?.length) ||
-          (!isTSCommandRef.current && preloadedFromSources?.length)
+        (isTSCommandRef.current && preloadedTimeSeriesSources) ||
+          (!isTSCommandRef.current && preloadedFromSources)
       );
       if (shouldUsePreloaded) {
         const normalized = isTSCommandRef.current
