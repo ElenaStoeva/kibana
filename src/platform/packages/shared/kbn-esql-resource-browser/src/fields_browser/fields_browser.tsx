@@ -12,12 +12,11 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { DataSourceSelectionChange } from '../types';
@@ -43,7 +42,7 @@ interface FieldsBrowserProps {
   indexPattern: string;
   /** Full ES|QL query text used for fetching recommended fields. */
   fullQuery: string;
-  activeSolutionId?: SolutionId;
+  activeSolutionId?: ESQLRegistrySolutionId;
   position?: { top?: number; left?: number };
 }
 

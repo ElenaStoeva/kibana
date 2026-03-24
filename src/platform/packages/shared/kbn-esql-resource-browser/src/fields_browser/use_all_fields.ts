@@ -9,9 +9,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { HttpStart } from '@kbn/core/public';
-import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type {
+  ESQLFieldWithMetadata,
+  RecommendedField,
+  ESQLRegistrySolutionId,
+} from '@kbn/esql-types';
 import type { TimeRange } from '@kbn/es-query';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getEditorExtensions, getEsqlColumns } from '@kbn/esql-utils';
 
@@ -21,7 +24,7 @@ export interface UseAllFieldsParams {
   indexPattern: string;
   fullQuery: string;
   http?: HttpStart;
-  activeSolutionId?: SolutionId;
+  activeSolutionId?: ESQLRegistrySolutionId;
   search?: ISearchGeneric;
   getTimeRange?: () => TimeRange;
   signal?: AbortSignal;
