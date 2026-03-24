@@ -55,6 +55,7 @@ export const useAllSources = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    let isEffectActive = true;
 
     if (preloadedSources !== undefined) {
       setAllSources(preloadedSources);
@@ -62,7 +63,6 @@ export const useAllSources = ({
     }
 
     const fetchSources = async () => {
-      let isEffectActive = true;
       setIsLoading(true);
       try {
         if (isTimeseries) {
@@ -78,13 +78,13 @@ export const useAllSources = ({
       } finally {
         if (isMountedRef.current && isEffectActive) setIsLoading(false);
       }
-
-      return () => {
-        isEffectActive = false;
-      };
     };
 
     fetchSources();
+
+    return () => {
+      isEffectActive = false;
+    };
   }, [getSources, getTimeseriesIndices, isTimeseries, isOpen, preloadedSources]);
 
   return { allSources, isLoading };
