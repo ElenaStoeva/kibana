@@ -13,9 +13,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   useEuiTheme,
   EuiFilterButton,
   EuiIcon,
@@ -187,19 +184,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       >
         {(list, search) => (
           <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
-            <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem>{i18nKeys.title}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    color="text"
-                    aria-label={i18nKeys.closeLabel}
-                    onClick={onClose}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">{i18nKeys.title}</EuiPopoverTitle>
             <div style={{ padding: euiTheme.size.s }}>{search}</div>
             <div style={{ maxHeight: MAX_LIST_HEIGHT, overflowY: 'auto' }}>{list}</div>
           </div>
