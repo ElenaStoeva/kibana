@@ -62,7 +62,7 @@ export function useDataSourceBrowser({
   const openCursorOffsetRef = useRef<number | undefined>(undefined);
   const insertionOffsetRef = useRef<number | undefined>(undefined);
   const selectedSourcesRef = useRef<string[]>([]);
-  const preloadedSourcesRef = useRef<ESQLSourceResult[]>([]);
+  const preloadedSourcesRef = useRef<ESQLSourceResult[] | undefined>(undefined);
 
   const updatePopoverPosition = useCallback(() => {
     const editor = editorRef.current;
@@ -172,6 +172,8 @@ export function useDataSourceBrowser({
           ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources ?? [] })
           : preloadedFromSources ?? [];
         preloadedSourcesRef.current = normalized;
+      } else {
+        preloadedSourcesRef.current = undefined;
       }
 
       // Position the popover near the cursor before opening it.

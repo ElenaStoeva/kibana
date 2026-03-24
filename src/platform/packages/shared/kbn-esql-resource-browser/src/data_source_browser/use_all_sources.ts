@@ -56,27 +56,32 @@ export const useAllSources = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    if (preloadedSources?.length) {
+    if (preloadedSources !== undefined) {
       setAllSources(preloadedSources);
       return;
     }
 
     const fetchSources = async () => {
+      let isEffectActive = true;
       setIsLoading(true);
       try {
         if (isTimeseries) {
           const result = (await getTimeseriesIndices?.()) ?? { indices: [] };
           const normalized = normalizeTimeseriesIndices(result);
-          if (isMountedRef.current) setAllSources(normalized);
+          if (isMountedRef.current && isEffectActive) setAllSources(normalized);
         } else {
           const fetched = (await getSources?.()) ?? [];
-          if (isMountedRef.current) setAllSources(fetched);
+          if (isMountedRef.current && isEffectActive) setAllSources(fetched);
         }
       } catch {
-        if (isMountedRef.current) setAllSources([]);
+        if (isMountedRef.current && isEffectActive) setAllSources([]);
       } finally {
-        if (isMountedRef.current) setIsLoading(false);
+        if (isMountedRef.current && isEffectActive) setIsLoading(false);
       }
+
+      return () => {
+        isEffectActive = false;
+      };
     };
 
     fetchSources();

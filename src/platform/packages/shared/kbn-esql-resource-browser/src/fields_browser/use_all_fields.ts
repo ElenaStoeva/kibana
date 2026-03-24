@@ -56,16 +56,31 @@ export const useAllFields = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    let isEffectActive = true;
     const canFetchRecommendations = Boolean(http && activeSolutionId && fullQuery);
     if (canFetchRecommendations) {
-      getEditorExtensions(http!, fullQuery, activeSolutionId!).then((extensions) => {
-        if (isMountedRef.current) {
-          setRecommendedFields(extensions?.recommendedFields ?? []);
-        }
-      });
+      getEditorExtensions(http!, fullQuery, activeSolutionId!)
+        .then((extensions) => {
+          if (isMountedRef.current && isEffectActive) {
+            setRecommendedFields(extensions?.recommendedFields ?? []);
+          }
+        })
+        .catch(() => {
+          if (isMountedRef.current && isEffectActive) {
+            setRecommendedFields([]);
+          }
+        });
     }
 
-    if (preloadedFields?.length) {
+    return () => {
+      isEffectActive = false;
+    };
+  }, [activeSolutionId, http, isOpen, fullQuery]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (preloadedFields.length) {
       const fieldsFromNames: ESQLFieldWithMetadata[] = preloadedFields.map((f) => ({
         name: f.name,
         type: (f.type as ESQLFieldWithMetadata['type']) ?? 'keyword',
@@ -98,17 +113,7 @@ export const useAllFields = ({
     };
 
     fetchFields();
-  }, [
-    activeSolutionId,
-    getTimeRange,
-    http,
-    isOpen,
-    preloadedFields,
-    indexPattern,
-    fullQuery,
-    search,
-    signal,
-  ]);
+  }, [getTimeRange, isOpen, preloadedFields, indexPattern, search, signal]);
 
   return { allFields, recommendedFields, isLoading };
 };
