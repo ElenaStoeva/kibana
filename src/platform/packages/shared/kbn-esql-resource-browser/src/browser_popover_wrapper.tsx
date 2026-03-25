@@ -124,7 +124,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       css={filterButtonStyle}
       onClick={() => setIsFilterOpen(!isFilterOpen)}
     >
-      <EuiIcon type="filter" />
+      <EuiIcon type="filter" aria-label={i18nKeys.filterTitle} />
     </EuiFilterButton>
   );
 
@@ -144,6 +144,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         ...position,
         position: 'absolute',
       }}
+      aria-label={i18nKeys.title}
     >
       <EuiSelectable
         searchable
@@ -164,6 +165,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               closePopover={() => setIsFilterOpen(false)}
               panelStyle={{ transform: `translateX(${FILTER_POPOVER_HORIZONTAL_OFFSET}px)` }}
               offset={FILTER_POPOVER_VERTICAL_OFFSET}
+              aria-label={i18nKeys.filterTitle}
             >
               {filterPanel}
             </EuiPopover>
