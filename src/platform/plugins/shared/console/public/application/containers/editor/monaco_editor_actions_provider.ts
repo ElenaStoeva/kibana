@@ -503,6 +503,19 @@ export class MonacoEditorActionsProvider {
     return insideComment;
   }
 
+  private isPositionInsideComment(model: monaco.editor.ITextModel, position: monaco.Position): boolean {
+    const trimmedContent = model.getLineContent(position.lineNumber).trim();
+
+    return (
+      trimmedContent.startsWith('#') ||
+      trimmedContent.startsWith('//') ||
+      trimmedContent.startsWith('/*') ||
+      trimmedContent.startsWith('*') ||
+      trimmedContent.includes('*/') ||
+      this.isInsideMultilineComment(model, position.lineNumber)
+    );
+  }
+
   private async getAutocompleteType(
     model: monaco.editor.ITextModel,
     { lineNumber, column }: monaco.Position
@@ -857,6 +870,14 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
+
+    // Don't trigger (and visually open) the suggestions widget inside comments.
+    // Even when our completion provider returns 0 results, Monaco can still surface
+    // an empty suggestions widget, which breaks user expectations and our UI tests.
+    if (this.isPositionInsideComment(model, position)) {
+      return;
+    }
+
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideEsqlQuery }) => {
         if (insideTripleQuotes && !insideEsqlQuery) {
