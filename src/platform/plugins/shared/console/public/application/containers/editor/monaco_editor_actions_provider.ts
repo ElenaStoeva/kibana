@@ -503,8 +503,9 @@ export class MonacoEditorActionsProvider {
     return insideComment;
   }
 
-  private isPositionInsideComment(model: monaco.editor.ITextModel, position: monaco.Position): boolean {
-    const trimmedContent = model.getLineContent(position.lineNumber).trim();
+  private isPositionInsideComment(model: monaco.editor.ITextModel, lineNumber: number): boolean {
+    // Get the content of the current line up until the cursor position
+    const trimmedContent = model.getLineContent(lineNumber).trim();
 
     return (
       trimmedContent.startsWith('#') ||
@@ -512,7 +513,7 @@ export class MonacoEditorActionsProvider {
       trimmedContent.startsWith('/*') ||
       trimmedContent.startsWith('*') ||
       trimmedContent.includes('*/') ||
-      this.isInsideMultilineComment(model, position.lineNumber)
+      this.isInsideMultilineComment(model, lineNumber)
     );
   }
 
@@ -520,19 +521,8 @@ export class MonacoEditorActionsProvider {
     model: monaco.editor.ITextModel,
     { lineNumber, column }: monaco.Position
   ): Promise<AutocompleteType | null> {
-    // Get the content of the current line up until the cursor position
-    const currentLineContent = model.getLineContent(lineNumber);
-    const trimmedContent = currentLineContent.trim();
-
     // If we are positioned inside a comment block, no autocomplete should be provided
-    if (
-      trimmedContent.startsWith('#') ||
-      trimmedContent.startsWith('//') ||
-      trimmedContent.startsWith('/*') ||
-      trimmedContent.startsWith('*') ||
-      trimmedContent.includes('*/') ||
-      this.isInsideMultilineComment(model, lineNumber)
-    ) {
+    if (this.isPositionInsideComment(model, lineNumber)) {
       return null;
     }
 
@@ -874,7 +864,7 @@ export class MonacoEditorActionsProvider {
     // Don't trigger (and visually open) the suggestions widget inside comments.
     // Even when our completion provider returns 0 results, Monaco can still surface
     // an empty suggestions widget, which breaks user expectations and our UI tests.
-    if (this.isPositionInsideComment(model, position)) {
+    if (this.isPositionInsideComment(model, position.lineNumber)) {
       return;
     }
 
