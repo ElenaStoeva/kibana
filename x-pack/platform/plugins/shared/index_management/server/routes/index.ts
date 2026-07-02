@@ -15,6 +15,7 @@ import { registerInferenceModelRoutes } from './api/inference_models';
 import { registerIndexMappingRoutes } from './api/mapping/register_index_mapping_route';
 import { registerNodesRoute } from './api/nodes';
 import { registerSettingsRoutes } from './api/settings';
+import { registerSnapshotRepositoriesRoute } from './api/snapshot_repositories';
 import { registerStatsRoute } from './api/stats';
 import { registerSyntheticSourceRoutes } from './api/synthetic_source';
 import { registerTemplateRoutes } from './api/templates';
@@ -31,6 +32,7 @@ export class ApiRoutes {
     registerNodesRoute(dependencies);
     registerEnrichPoliciesRoute(dependencies);
     registerSyntheticSourceRoutes(dependencies);
+    registerSnapshotRepositoriesRoute(dependencies);
 
     if (dependencies.config.isIndexStatsEnabled !== false) {
       registerStatsRoute(dependencies);
